@@ -1,9 +1,12 @@
 package cz.czechitas.java2webapps.ukol3.controller;
 
 import cz.czechitas.java2webapps.ukol3.entity.Vizitka;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
@@ -96,7 +99,30 @@ public class VizitkaController {
   @GetMapping(path = "/detail", params = "id")
   public ModelAndView detail(int id) {
     ModelAndView result = new ModelAndView("detail");
+    result.addObject("id", id);
     result.addObject("vizitka", seznamVizitek.get(id));
     return result;
+  }
+
+  @GetMapping(path = "/nova")
+  public ModelAndView nova() {
+    return new ModelAndView("nova");
+  }
+
+  @PostMapping(value = "/nova", params = {"jmeno", "firma", "ulice", "obecPsc", "email", "telefon", "web"})
+  public String add(Vizitka vizitka){
+    seznamVizitek.add(vizitka);
+    return "redirect:/";
+  }
+
+  @PostMapping(value = "/detail", params = {"id"})
+  public String delete(int id) {
+    seznamVizitek.remove(id);
+    return "redirect:/";
+  }
+
+  @InitBinder    /* Converts empty strings into null when a form is submitted - used for email, telefon and web values */
+  public void initBinder(WebDataBinder binder) {
+    binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
   }
 }
